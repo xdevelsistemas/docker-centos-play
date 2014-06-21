@@ -8,9 +8,8 @@ RUN cd /opt && \
   mv /opt/play-2.2.3 /opt/play  && \                                                                                       
   ln -s /opt/play/play /usr/local/bin/play                                                                                 
                                                                                                                            
-RUN mkdir /opt/workspace && chmod 755 /opt/workspace && cd /opt/workspace                                                  
                                                                                                                            
-VOLUME ["/opt/workspace"]                                                                                                  
-WORKDIR /opt/workspace                                                                                            
+VOLUME ["/data"]                                                                                                  
+WORKDIR /data                                                                                            
 EXPOSE 9000                                                                                                       
 CMD ["/opt/play/play"]  
