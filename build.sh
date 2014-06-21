@@ -1,1 +1,1 @@
-docker build -t zhaowh/play .
+docker build -t zhaowh/centos-play .
