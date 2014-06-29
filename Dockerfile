@@ -1,15 +1,43 @@
-FROM zhaowh/centos-java                                                                                                    
-MAINTAINER  Zhao Weihong                                                                                                   
-                                                                                                                           
-RUN cd /opt && \                                                                                                           
-  wget http://downloads.typesafe.com/play/2.2.3/play-2.2.3.zip -O /opt/play.zip && \                                            
-  unzip /opt/play.zip -d /opt && \                                                                                         
-  rm -f /opt/play.zip && \                                                                                                 
-  mv /opt/play-2.2.3 /opt/play  && \                                                                                       
-  ln -s /opt/play/play /usr/local/bin/play                                                                                 
-                                                                                                                           
-                                                                                                                           
-VOLUME ["/data"]                                                                                                  
-WORKDIR /data                                                                                            
-EXPOSE 9000                                                                                                       
-CMD ["/opt/play/play"]  
+FROM centos:latest
+MAINTAINER Clayton Silva<clayton@xdevel.com.br>
+
+RUN yum install -y wget && yum clean all
+
+#add yum source mirror
+RUN mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup && \
+    cd /etc/yum.repos.d/ && \
+    wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-6.repo 
+
+#install epel
+RUN yum localinstall -y  http://mirrors.aliyun.com/epel/6/x86_64/epel-release-6-8.noarch.rpm  && \
+    rm /var/tmp/* -rf && yum clean all
+
+#add epel source  mirror
+RUN mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.backup && \
+    mv /etc/yum.repos.d/epel-testing.repo /etc/yum.repos.d/epel-testing.repo.backup && \
+    cd /etc/yum.repos.d/ && \
+    wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo 
+
+#install tools
+RUN yum update -y && \
+    yum install -y --enablerepo=epel  \
+      unzip \
+      tar  &&\
+    yum clean all
+
+CMD ["bash"]
+
+#install oracle java
+RUN wget "http://xdevel.com.br/downloads/jdk-7u60-linux-x64.rpm" \
+         -O /var/tmp/jdk-7-linux-x64.rpm  && \
+    yum localinstall -y /var/tmp/jdk-7-linux-x64.rpm && \
+    rm /var/tmp/* -rf && yum clean all
+
+ENV         JAVA_HOME /usr/java/default
+ENV         ACTIVATOR_VERSION 1.2.2
+# INSTALL TYPESAFE ACTIVATOR
+RUN         cd /tmp && \
+            wget http://downloads.typesafe.com/typesafe-activator/$ACTIVATOR_VERSION/typesafe-activator-$ACTIVATOR_VERSION.zip && \
+            unzip typesafe-activator-$ACTIVATOR_VERSION.zip -d /usr/local && \
+            mv /usr/local/activator-$ACTIVATOR_VERSION /usr/local/activator && \
+            rm typesafe-activator-$ACTIVATOR_VERSION.zip
